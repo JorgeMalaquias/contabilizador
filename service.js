@@ -24,7 +24,30 @@ const recuperarSaldosPorConta = (lancamentos) => {
 }
 
 const recuperarMaiorMenorLancamentos = (cpf, lancamentos) => {
-   return [];
+   const maiorMenorRegistrosCpf = [];
+
+   for (let i = 0; i < lancamentos.length; i++) {
+      if (lancamentos[i].cpf === cpf) {
+         if (maiorMenorRegistrosCpf.length > 0) {
+
+            //condição em que é comparado se o lançamento analisado é menor do que o atual menor lançamento que está salvo em maiorMenorRegistrosCpf[0]
+            if (maiorMenorRegistrosCpf[0].valor > lancamentos[i].valor) {
+               maiorMenorRegistrosCpf[0] = lancamentos[i];
+               continue;
+            }
+
+            //condição em que é comparado se o lançamento analisado é maior do que o atual maior lançamento que está salvo em maiorMenorRegistrosCpf[1]
+            if (maiorMenorRegistrosCpf[1].valor < lancamentos[i].valor) {
+               maiorMenorRegistrosCpf[1] = lancamentos[i];
+            }
+
+         } else {
+            maiorMenorRegistrosCpf.push(lancamentos[i]);
+            maiorMenorRegistrosCpf.push(lancamentos[i]);
+         }
+      }
+   }
+   return maiorMenorRegistrosCpf;
 }
 
 const recuperarMaioresSaldos = (lancamentos) => {
