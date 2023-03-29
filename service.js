@@ -1,38 +1,17 @@
 const validarEntradaDeDados = (lancamento) => {
 
-   let validaçãoResultado = "";
+   let validacaoResultado = validarCpf(lancamento.cpf);
 
-   const valorRegex = /^[0-9]{11}$/;
+   validacaoResultado += validarValor(lancamento.valor);
 
-   if (!valorRegex.test(lancamento.cpf)) {
-      validaçãoResultado = "* Devem ser informados somente números no campo CPF, totalizando 11 dígitos!" + "\n";
-   }
+   return (validacaoResultado === "") ? null : validacaoResultado;
 
-   if (!validarCpf(lancamento.cpf)) {
-      validaçãoResultado += "* Dígitos verificadores do cpf informado inválidos!" + "\n";;
-   }
-   if (typeof lancamento.valor !== 'number') {
-      validaçãoResultado += "* O dado informado no campo VALOR deve ser numérico!" + "\n";;
-   }
-   if (lancamento.valor > 15000 || lancamento.valor < -2000) {
-      validaçãoResultado += "* O valor do lançamento não pode ser superior a 15000.00 e nem inferior a -2000.00!" + "\n";
-   }
-
-   return (validaçãoResultado === '') ? null : validaçãoResultado;
 }
 
 const recuperarSaldosPorConta = (lancamentos) => {
 
-   const saldos = {};
-
-   for (let i = 0; i < lancamentos.length; i++) {
-      if ((saldos[lancamentos[i].cpf])) {
-         saldos[lancamentos[i].cpf] += lancamentos[i].valor;
-      }
-      else {
-         saldos[lancamentos[i].cpf] = lancamentos[i].valor;
-      }
-   }
+   // hash para salvar os cpfs(chave), e seus respectivos saldos
+   const saldos = gerarHashSaldos(lancamentos);
 
    const saldosArray = [];
 
@@ -41,6 +20,7 @@ const recuperarSaldosPorConta = (lancamentos) => {
    }
 
    return saldosArray;
+
 }
 
 const recuperarMaiorMenorLancamentos = (cpf, lancamentos) => {
@@ -58,42 +38,24 @@ const recuperarMaiorMenorLancamentos = (cpf, lancamentos) => {
          }
       }
    }
+
    return maiorMenorRegistrosCpf;
+
 }
 
 const recuperarMaioresSaldos = (lancamentos) => {
 
-   // hash para salvar os cpfs(chave), e seus respectivos saldos
-   const saldos = {};
-
-   for (let i = 0; i < lancamentos.length; i++) {
-      if ((saldos[lancamentos[i].cpf])) {
-         saldos[lancamentos[i].cpf] += lancamentos[i].valor;
-      }
-      else {
-         saldos[lancamentos[i].cpf] = lancamentos[i].valor;
-      }
-   }
+   const saldos = gerarHashSaldos(lancamentos);
 
    const tresMaioresSaldosArray = mapearMaiores(saldos);
 
    return tresMaioresSaldosArray;
+
 }
 
 const recuperarMaioresMedias = (lancamentos) => {
 
-   //hash para salvar os cpfs(chave), seus respectivos saldos e quantidade de lançamentos
-   const medias = {};
-
-   for (let i = 0; i < lancamentos.length; i++) {
-      if ((medias[lancamentos[i].cpf])) {
-         medias[lancamentos[i].cpf].valor += lancamentos[i].valor;
-         medias[lancamentos[i].cpf].numeroLancamentos++;
-      }
-      else {
-         medias[lancamentos[i].cpf] = { valor: lancamentos[i].valor, numeroLancamentos: 1 };
-      }
-   }
+   const medias = gerarHashMedias(lancamentos);
 
    //iterando sob a hash para calcular e salvar a média de cada cpf
    for (let i in medias) {
@@ -103,6 +65,7 @@ const recuperarMaioresMedias = (lancamentos) => {
    const tresMaioresMediasArray = mapearMaiores(medias);
 
    return tresMaioresMediasArray;
+
 }
 
 // funções auxiliares
@@ -144,10 +107,63 @@ const mapearMaiores = (registros) => {
    }
 
    return tresMaioresRegistrosArray;
+
+}
+
+const gerarHashSaldos = (lancamentos) => {
+
+   // hash para salvar os cpfs(chave), e seus respectivos saldos
+   const saldos = {};
+
+   for (let i = 0; i < lancamentos.length; i++) {
+      if ((saldos[lancamentos[i].cpf])) {
+         saldos[lancamentos[i].cpf] += lancamentos[i].valor;
+      }
+      else {
+         saldos[lancamentos[i].cpf] = lancamentos[i].valor;
+      }
+   }
+   return saldos;
+
+}
+
+const gerarHashMedias = (lancamentos) => {
+
+   //hash para salvar os cpfs(chave), seus respectivos saldos e quantidade de lançamentos
+   const medias = {};
+
+   for (let i = 0; i < lancamentos.length; i++) {
+      if ((medias[lancamentos[i].cpf])) {
+         medias[lancamentos[i].cpf].valor += lancamentos[i].valor;
+         medias[lancamentos[i].cpf].numeroLancamentos++;
+      }
+      else {
+         medias[lancamentos[i].cpf] = { valor: lancamentos[i].valor, numeroLancamentos: 1 };
+      }
+   }
+
+   return medias;
+
+}
+
+const validarCpf = (cpf) => {
+
+   let validacaoResultado = "";
+   const valorRegex = /^[0-9]{11}$/;
+
+   if (!valorRegex.test(cpf)) {
+      validacaoResultado += "* Devem ser informados somente números no campo CPF, totalizando 11 dígitos!" + "\n";
+   }
+   if (!validarDigitosCpf(cpf)) {
+      validacaoResultado += "* Dígitos verificadores do cpf informado inválidos!" + "\n";;
+   }
+
+   return validacaoResultado;
+
 }
 
 //função retirada de https://www.geradorcpf.com/javascript-validar-cpf.htm
-const validarCpf = (cpf) => {
+const validarDigitosCpf = (cpf) => {
 
    // remove eventuais máscaras
    cpf = cpf.replace(/[^\d]+/g, '');
@@ -183,4 +199,20 @@ const validarCpf = (cpf) => {
    }
 
    return true;
+
+}
+
+const validarValor = (valor) => {
+
+   let validacaoResultado = "";
+
+   if (typeof valor !== "number") {
+      validacaoResultado += "* O dado informado no campo VALOR deve ser numérico!" + "\n";;
+   }
+   if (valor > 15000 || valor < -2000) {
+      validacaoResultado += "* O valor do lançamento não pode ser superior a 15000.00 e nem inferior a -2000.00!" + "\n";
+   }
+
+   return validacaoResultado;
+
 }
