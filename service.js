@@ -1,5 +1,24 @@
 const validarEntradaDeDados = (lancamento) => {
-   return null;
+
+   let validaçãoResultado = "";
+
+   const valorRegex = /^[0-9]{11}$/;
+
+   if (!valorRegex.test(lancamento.cpf)) {
+      validaçãoResultado = "* Devem ser informados somente números no campo CPF, totalizando 11 dígitos!" + "\n";
+   }
+
+   if (!validarCpf(lancamento.cpf)) {
+      validaçãoResultado += "* Dígitos verificadores do cpf informado inválidos!" + "\n";;
+   }
+   if (typeof lancamento.valor !== 'number') {
+      validaçãoResultado += "* O dado informado no campo VALOR deve ser numérico!" + "\n";;
+   }
+   if (lancamento.valor > 15000 || lancamento.valor < -2000) {
+      validaçãoResultado += "* O valor do lançamento não pode ser superior a 15000.00 e nem inferior a -2000.00!" + "\n";
+   }
+
+   return (validaçãoResultado === '') ? null : validaçãoResultado;
 }
 
 const recuperarSaldosPorConta = (lancamentos) => {
@@ -64,7 +83,7 @@ const recuperarMaioresSaldos = (lancamentos) => {
       }
    }
 
-   const tresMaioresSaldosArray = mapeandoMaiores(saldos);
+   const tresMaioresSaldosArray = mapearMaiores(saldos);
 
    return tresMaioresSaldosArray;
 }
@@ -86,7 +105,7 @@ const recuperarMaioresMedias = (lancamentos) => {
       medias[i] = medias[i].valor / medias[i].numeroLancamentos;
    }
 
-   const tresMaioresMediasArray = mapeandoMaiores(medias);
+   const tresMaioresMediasArray = mapearMaiores(medias);
 
    return tresMaioresMediasArray;
 }
@@ -94,7 +113,7 @@ const recuperarMaioresMedias = (lancamentos) => {
 // funções auxiliares
 
 
-const mapeandoMaiores = (registros) => {
+const mapearMaiores = (registros) => {
    const tresMaioresRegistrosArray = [];
 
    for (let i in registros) {
@@ -134,4 +153,43 @@ const mapeandoMaiores = (registros) => {
    }
 
    return tresMaioresRegistrosArray;
+}
+
+const validarCpf = (cpf) => {
+
+   cpf = cpf.replace(/[^\d]+/g, '');
+
+   // Valida 1o digito	
+   let add = 0;
+   for (i = 0; i < 9; i++) {
+      add += parseInt(cpf.charAt(i)) * (10 - i);
+   }
+
+   let rev = 11 - (add % 11);
+
+   if (rev == 10 || rev == 11) {
+      rev = 0;
+   }
+
+   if (rev != parseInt(cpf.charAt(9))) {
+      return false;
+   }
+
+   // Valida 2o digito	
+   add = 0;
+   for (i = 0; i < 10; i++) {
+      add += parseInt(cpf.charAt(i)) * (11 - i);
+   }
+
+   rev = 11 - (add % 11);
+
+   if (rev == 10 || rev == 11) {
+      rev = 0;
+   }
+
+   if (rev != parseInt(cpf.charAt(10))) {
+      return false;
+   }
+
+   return true;
 }
