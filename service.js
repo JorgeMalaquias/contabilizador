@@ -70,7 +70,25 @@ const recuperarMaioresSaldos = (lancamentos) => {
 }
 
 const recuperarMaioresMedias = (lancamentos) => {
-   return [];
+   const medias = {};
+
+   for (let i = 0; i < lancamentos.length; i++) {
+      if ((medias[lancamentos[i].cpf])) {
+         medias[lancamentos[i].cpf].valor += lancamentos[i].valor;
+         medias[lancamentos[i].cpf].numeroLancamentos++;
+      }
+      else {
+         medias[lancamentos[i].cpf] = { valor: lancamentos[i].valor, numeroLancamentos: 1 };
+      }
+   }
+
+   for (let i in medias) {
+      medias[i] = medias[i].valor / medias[i].numeroLancamentos;
+   }
+
+   const tresMaioresMediasArray = mapeandoMaiores(medias);
+
+   return tresMaioresMediasArray;
 }
 
 // funções auxiliares
@@ -83,8 +101,8 @@ const mapeandoMaiores = (registros) => {
 
       if (tresMaioresRegistrosArray.length === 3) {
          for (let j = 0; j < 3; j++) {
-            if (saldos[i] > tresMaioresRegistrosArray[j]) {
-               const registro = { cpf: i, valor: saldos[i] };
+            if (registros[i] > tresMaioresRegistrosArray[j].valor) {
+               const registro = { cpf: i, valor: registros[i] };
                tresMaioresRegistrosArray.splice(j, 0, registro);
                tresMaioresRegistrosArray.pop();
                break;
@@ -95,21 +113,22 @@ const mapeandoMaiores = (registros) => {
 
          const tamanhoInicial = tresMaioresRegistrosArray.length;
 
-         for (let j = 0; j < tresMaioresRegistrosArray.length - 1; j++) {
-            if (saldos[i] > tresMaioresRegistrosArray[j]) {
-               const registro = { cpf: i, valor: saldos[i] };
+         for (let j = 0; j < tresMaioresRegistrosArray.length; j++) {
+            if (registros[i] > tresMaioresRegistrosArray[j].valor) {
+               const registro = { cpf: i, valor: registros[i] };
                tresMaioresRegistrosArray.splice(j, 0, registro);
                break;
             }
          }
 
          if (tresMaioresRegistrosArray.length === tamanhoInicial) {
-            const registro = { cpf: i, valor: saldos[i] };
+
+            const registro = { cpf: i, valor: registros[i] };
             tresMaioresRegistrosArray.push(registro);
          }
       }
       else {
-         const registro = { cpf: i, valor: saldos[i] };
+         const registro = { cpf: i, valor: registros[i] };
          tresMaioresRegistrosArray.push(registro);
       }
    }
