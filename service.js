@@ -44,27 +44,17 @@ const recuperarSaldosPorConta = (lancamentos) => {
 }
 
 const recuperarMaiorMenorLancamentos = (cpf, lancamentos) => {
-   const maiorMenorRegistrosCpf = [];
+
+   //array para salvar menor valor no índice zero e maior no índice 1
+   const maiorMenorRegistrosCpf = [{ valor: Infinity }, { valor: -Infinity }];
 
    for (let i = 0; i < lancamentos.length; i++) {
       if (lancamentos[i].cpf === cpf) {
-         if (maiorMenorRegistrosCpf.length > 0) {
-
-            //condição em que é comparado se o lançamento analisado é menor do que o atual menor lançamento que está salvo em maiorMenorRegistrosCpf[0]
-            if (maiorMenorRegistrosCpf[0].valor > lancamentos[i].valor) {
-               maiorMenorRegistrosCpf[0] = lancamentos[i];
-               continue;
-            }
-
-            //condição em que é comparado se o lançamento analisado é maior do que o atual maior lançamento que está salvo em maiorMenorRegistrosCpf[1]
-            if (maiorMenorRegistrosCpf[1].valor < lancamentos[i].valor) {
-               maiorMenorRegistrosCpf[1] = lancamentos[i];
-            }
-
+         if (maiorMenorRegistrosCpf[0].valor > lancamentos[i].valor) {
+            maiorMenorRegistrosCpf[0] = lancamentos[i];
          }
-         else {
-            maiorMenorRegistrosCpf.push(lancamentos[i]);
-            maiorMenorRegistrosCpf.push(lancamentos[i]);
+         if (maiorMenorRegistrosCpf[1].valor < lancamentos[i].valor) {
+            maiorMenorRegistrosCpf[1] = lancamentos[i];
          }
       }
    }
@@ -72,6 +62,8 @@ const recuperarMaiorMenorLancamentos = (cpf, lancamentos) => {
 }
 
 const recuperarMaioresSaldos = (lancamentos) => {
+
+   // hash para salvar os cpfs(chave), e seus respectivos saldos
    const saldos = {};
 
    for (let i = 0; i < lancamentos.length; i++) {
@@ -89,6 +81,8 @@ const recuperarMaioresSaldos = (lancamentos) => {
 }
 
 const recuperarMaioresMedias = (lancamentos) => {
+
+   //hash para salvar os cpfs(chave), seus respectivos saldos e quantidade de lançamentos
    const medias = {};
 
    for (let i = 0; i < lancamentos.length; i++) {
@@ -101,6 +95,7 @@ const recuperarMaioresMedias = (lancamentos) => {
       }
    }
 
+   //iterando sob a hash para calcular e salvar a média de cada cpf
    for (let i in medias) {
       medias[i] = medias[i].valor / medias[i].numeroLancamentos;
    }
@@ -114,10 +109,10 @@ const recuperarMaioresMedias = (lancamentos) => {
 
 
 const mapearMaiores = (registros) => {
+
    const tresMaioresRegistrosArray = [];
 
    for (let i in registros) {
-
       if (tresMaioresRegistrosArray.length === 3) {
          for (let j = 0; j < 3; j++) {
             if (registros[i] > tresMaioresRegistrosArray[j].valor) {
@@ -129,9 +124,7 @@ const mapearMaiores = (registros) => {
          }
       }
       else if (tresMaioresRegistrosArray.length > 0) {
-
          const tamanhoInicial = tresMaioresRegistrosArray.length;
-
          for (let j = 0; j < tresMaioresRegistrosArray.length; j++) {
             if (registros[i] > tresMaioresRegistrosArray[j].valor) {
                const registro = { cpf: i, valor: registros[i] };
@@ -139,9 +132,7 @@ const mapearMaiores = (registros) => {
                break;
             }
          }
-
          if (tresMaioresRegistrosArray.length === tamanhoInicial) {
-
             const registro = { cpf: i, valor: registros[i] };
             tresMaioresRegistrosArray.push(registro);
          }
@@ -155,8 +146,10 @@ const mapearMaiores = (registros) => {
    return tresMaioresRegistrosArray;
 }
 
+//função retirada de https://www.geradorcpf.com/javascript-validar-cpf.htm
 const validarCpf = (cpf) => {
 
+   // remove eventuais máscaras
    cpf = cpf.replace(/[^\d]+/g, '');
 
    // Valida 1o digito	
@@ -166,7 +159,6 @@ const validarCpf = (cpf) => {
    }
 
    let rev = 11 - (add % 11);
-
    if (rev == 10 || rev == 11) {
       rev = 0;
    }
@@ -182,7 +174,6 @@ const validarCpf = (cpf) => {
    }
 
    rev = 11 - (add % 11);
-
    if (rev == 10 || rev == 11) {
       rev = 0;
    }
